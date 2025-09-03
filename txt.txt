@@ -1,0 +1,403 @@
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { SplitText } from 'gsap/all';
+import React, { useRef, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
+
+gsap.registerPlugin(SplitText);
+
+const Hero = () => {
+    const videoRef = useRef();
+    const isMobile = useMediaQuery({ maxWidth: 767 });
+
+    const sectionRef = useRef();
+    const leftLeafRef = useRef();
+    const rightLeafRef = useRef();
+    const cocktailLinkRef = useRef();
+
+    // Refs for About, Menu, Contact to animate separately
+    const aboutRef = useRef();
+    const menuRef = useRef();
+    const contactRef = useRef();
+
+    useGSAP(() => {
+        // --- HERO TEXT ---
+        const heroSplit = new SplitText('.title', { type: 'chars,words' });
+        const paragraphSplit = new SplitText('.subtitle', { type: 'lines' });
+        heroSplit.chars.forEach(char => char.classList.add('text-gradient'));
+
+        gsap.from(heroSplit.chars, {
+            yPercent: 100,
+            opacity: 0,
+            duration: 1.4,
+            ease: 'expo.out',
+            stagger: 0.075,
+            delay: 0.2,
+        });
+
+        gsap.from(paragraphSplit.lines, {
+            opacity: 0,
+            yPercent: 100,
+            duration: 1.3,
+            ease: 'expo.out',
+            stagger: 0.09,
+            delay: 1,
+        });
+
+        gsap.from(sectionRef.current, {
+            opacity: 0,
+            scale: 0.98,
+            duration: 1.4,
+            ease: 'power2.out',
+        });
+
+        // --- LEAFS ---
+        gsap.fromTo(
+            leftLeafRef.current,
+            { autoAlpha: 0, x: -40, rotate: -7 },
+            { autoAlpha: 1, x: 0, rotate: 0, duration: 1.6, ease: 'power3.out', delay: 0.4 }
+        );
+        gsap.fromTo(
+            rightLeafRef.current,
+            { autoAlpha: 0, x: 40, rotate: 7 },
+            { autoAlpha: 1, x: 0, rotate: 0, duration: 1.6, ease: 'power3.out', delay: 0.7 }
+        );
+        // Floating idle
+        gsap.to(leftLeafRef.current, {
+            y: '+=12',
+            rotate: -1,
+            duration: 4,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            delay: 2,
+        });
+        gsap.to(rightLeafRef.current, {
+            y: '-=12',
+            rotate: 1,
+            duration: 4.5,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            delay: 2.5,
+        });
+
+        gsap.from('.hero-body', {
+            y: 30,
+            opacity: 0,
+            duration: 1.2,
+            ease: 'power3.out',
+            delay: 1.2,
+        });
+
+        gsap.fromTo(
+            cocktailLinkRef.current,
+            { scale: 0.92, opacity: 0, y: 22 },
+            {
+                scale: 1,
+                opacity: 1,
+                y: 0,
+                duration: 1.4,
+                ease: 'elastic.out(1,0.72)',
+                delay: 1.8,
+            }
+        );
+
+        // --- LEAF PARALLAX ON SCROLL ---
+        gsap.timeline({
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: true,
+            },
+        })
+            .to('.right-leaf', { y: 200 }, 0)
+            .to('.left-leaf', { y: -200 }, 0);
+
+        // --- VIDEO ANIMATION (from first code) ---
+        const startValue = isMobile ? 'top 50%' : 'center 60%';
+        const endValue = isMobile ? '120% top' : 'bottom top';
+
+        const tlVideo = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#hero',
+                start: startValue,
+                end: endValue,
+                scrub: true,
+                pin: true,
+            },
+        });
+
+        // Fade in smoothly
+        gsap.from('.video video', {
+            opacity: 0,
+            scale: 1.05,
+            duration: 1.8,
+            ease: 'power2.out',
+            delay: 0.3,
+        });
+
+        videoRef.current.onloadedmetadata = () => {
+            tlVideo.to(videoRef.current, {
+                currentTime: videoRef.current.duration,
+            });
+        };
+
+        // --- ABOUT SECTION ---
+        if (aboutRef.current) {
+            const aboutTitleSplit = new SplitText('#about h2', { type: 'words,chars' });
+            gsap.from(aboutTitleSplit.chars, {
+                opacity: 0,
+                y: 30,
+                stagger: 0.04,
+                ease: 'power3.out',
+                duration: 1.2,
+                scrollTrigger: {
+                    trigger: '#about',
+                    start: 'top 75%',
+                },
+            });
+
+            gsap.from('#about .content > *:not(h2)', {
+                y: 30,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.out',
+                stagger: 0.25,
+                scrollTrigger: {
+                    trigger: '#about',
+                    start: 'top 75%',
+                },
+            });
+
+            gsap.to('#about .top-grid > div, #about .bottom-grid > div', {
+                y: '+=15',
+                duration: 5,
+                ease: 'sine.inOut',
+                repeat: -1,
+                yoyo: true,
+                scrollTrigger: {
+                    trigger: '#about',
+                    start: 'top 80%',
+                },
+            });
+        }
+
+        // --- MENU SECTION ---
+        if (menuRef.current) {
+            const menuTitleSplit = new SplitText('#menu .cocktail-tabs button', { type: 'words' });
+            gsap.from(menuTitleSplit.words, {
+                y: 20,
+                opacity: 0,
+                stagger: 0.06,
+                duration: 1,
+                ease: 'power4.out',
+                scrollTrigger: {
+                    trigger: '#menu',
+                    start: 'top 80%',
+                },
+            });
+
+            gsap.from('#menu .cocktail', {
+                scale: 0.98,
+                opacity: 0,
+                duration: 1.3,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: '#menu',
+                    start: 'top 80%',
+                },
+            });
+
+            gsap.from('#menu .recipe .info, #menu .recipe .details', {
+                x: 30,
+                opacity: 0,
+                duration: 1,
+                ease: 'power2.out',
+                stagger: 0.3,
+                scrollTrigger: {
+                    trigger: '#menu .recipe',
+                    start: 'top 90%',
+                },
+            });
+
+            gsap.to('#menu .cocktail img', {
+                y: '+=8',
+                duration: 6,
+                ease: 'sine.inOut',
+                repeat: -1,
+                yoyo: true,
+                scrollTrigger: {
+                    trigger: '#menu',
+                    start: 'top 80%',
+                },
+            });
+        }
+
+        // --- CONTACT SECTION ---
+        if (contactRef.current) {
+            const contactTitleSplit = new SplitText('#contact h2', { type: 'chars,words' });
+            gsap.from(contactTitleSplit.chars, {
+                y: 25,
+                opacity: 0,
+                stagger: 0.05,
+                ease: 'power3.out',
+                duration: 1.4,
+                scrollTrigger: {
+                    trigger: '#contact',
+                    start: 'top 85%',
+                },
+            });
+
+            gsap.from('#contact p, #contact h3', {
+                y: 20,
+                opacity: 0,
+                duration: 1.1,
+                ease: 'power2.out',
+                stagger: 0.2,
+                scrollTrigger: {
+                    trigger: '#contact',
+                    start: 'top 90%',
+                },
+            });
+
+            gsap.to('#f-left-leaf, #f-right-leaf', {
+                y: '+=10',
+                duration: 4,
+                ease: 'sine.inOut',
+                repeat: -1,
+                yoyo: true,
+                scrollTrigger: {
+                    trigger: '#contact',
+                    start: 'top 90%',
+                },
+            });
+        }
+    }, []);
+
+    // --- Hover effect for Cocktail Link ---
+    useEffect(() => {
+        const link = cocktailLinkRef.current;
+        let tl;
+        function onEnter() {
+            tl = gsap.timeline();
+            tl.to(link, {
+                scale: 1.06,
+                boxShadow: '0 6px 36px 0 rgba(32,32,45,0.18)',
+                duration: 0.32,
+                ease: 'expo.out',
+            })
+                .to(
+                    link,
+                    {
+                        '--cocktail-shine-x': '120%',
+                        duration: 0.7,
+                        ease: 'power2.out',
+                    },
+                    0
+                )
+                .to(link, {
+                    '--cocktail-shine-x': '-30%',
+                    duration: 0,
+                    immediateRender: false,
+                    delay: 0.6,
+                });
+        }
+        function onLeave() {
+            if (tl) tl.reverse();
+        }
+        if (link) {
+            link.addEventListener('mouseenter', onEnter);
+            link.addEventListener('mouseleave', onLeave);
+        }
+        return () => {
+            if (link) {
+                link.removeEventListener('mouseenter', onEnter);
+                link.removeEventListener('mouseleave', onLeave);
+            }
+        };
+    }, []);
+
+    return (
+        <>
+            <section id="hero" className="noisy relative" ref={sectionRef}>
+                <h1 className="title">LUNITO</h1>
+                <img
+                    src="/images/hero-left-leaf.png"
+                    alt="left leaf"
+                    className="left-leaf"
+                    ref={leftLeafRef}
+                    style={{ willChange: 'transform, opacity' }}
+                />
+                <img
+                    src="/images/hero-right-leaf.png"
+                    alt="right leaf"
+                    className="right-leaf"
+                    ref={rightLeafRef}
+                    style={{ willChange: 'transform, opacity' }}
+                />
+                <div className="hero-body">
+                    <div className="hero-content">
+                        {/* Left Content */}
+                        <div className="space-y-5 hidden md:block">
+                            <p className="text-lg">Cool. Crisp. Classic.</p>
+                            <p className="subtitle font-modern-negra text-6xl text-yellow max-w-xl">
+                                One Sip <br /> Endless Vibes
+                            </p>
+                        </div>
+                        <div className="view-cocktails">
+                            <p className="subtitle">
+                                Each cocktail is more than a drink — it’s a story of premium ingredients, crafted with passion, and served to awaken your senses
+                            </p>
+                            <a
+                                href="#cocktails"
+                                ref={cocktailLinkRef}
+                                className="cocktail-link"
+                                tabIndex={0}
+                                style={{
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    '--cocktail-shine-x': '-30%',
+                                    WebkitTapHighlightColor: 'transparent',
+                                }}
+                            >
+                                View Cocktails
+                                <span className="cocktail-shine" aria-hidden="true" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* VIDEO FIXED BEHIND HERO */}
+            <div className="video absolute inset-0">
+                <video
+                    ref={videoRef}
+                    src="/videos/input.mp4"
+                    muted
+                    playsInline
+                    autoPlay
+                    loop
+                    preload="auto"
+                    className="w-full h-full object-cover"
+                />
+            </div>
+
+            {/* ======= Other sections ======= */}
+            <section id="about" ref={aboutRef}>
+                {/* Your existing about content */}
+            </section>
+
+            <section id="menu" ref={menuRef}>
+                {/* Your existing menu content */}
+            </section>
+
+            <section id="contact" ref={contactRef}>
+                {/* Your existing contact content */}
+            </section>
+        </>
+    );
+};
+
+export default Hero;

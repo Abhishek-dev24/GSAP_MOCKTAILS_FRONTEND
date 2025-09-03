@@ -444,4 +444,15 @@ body {
     outline: 2px solid rgba(80,70,255,0.13);
     outline-offset: 2px;
   }
+
+  .image-wrapper img {
+    transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+    transform-origin: center;
+    will-change: transform, filter, box-shadow;
+  }
+  
+  .badge {
+    display: inline-block;
+    transform-origin: center;
+  }
   

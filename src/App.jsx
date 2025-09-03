@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,11 +11,11 @@ const App = () => {
   const textRef = useRef(null);
 
   return (
-    <div className="flex-center h-[100vh]">
-      <h1>
-        Abhishek Meshram
-      </h1>
-    </div>
+    <main>
+      <Navbar />
+      <Hero />
+      <div className="h-dvh bg-black"></div>
+    </main>
   );
 };
 
